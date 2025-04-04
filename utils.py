@@ -4,7 +4,7 @@ import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-BASE_URL = "https://zxgbhnz8ox.voorivex-lab.online/"
+BASE_URL = "https://xopvzxobtr.voorivex-lab.online/"
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 VERIFY = False
 PROXIES = {
